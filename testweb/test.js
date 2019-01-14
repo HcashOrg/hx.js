@@ -3,7 +3,7 @@ let {
     Address,
     key,
     TransactionBuilder,
-    TransactionHelper,
+    TransactionHelper
     // axios
 } = hx_js;
 let {Apis, ChainConfig} = hx_js.bitshares_ws;
@@ -19,7 +19,8 @@ ChainConfig.setChainId(
 );
 
 // let nodeApiUrl = "ws://211.159.168.197:6090"; // mainnet: "ws://211.159.168.197:6090", testnet: "ws://47.74.44.110:8091";
-let nodeApiUrl = "ws://localhost:8090";
+// let nodeApiUrl = "ws://localhost:8090";
+let nodeApiUrl = "wss://nodeapi.hxlab.org:443";
 
 ChainConfig.address_prefix = "HX";
 ChainConfig.expire_in_secs = 5 * 60; // 5 min
