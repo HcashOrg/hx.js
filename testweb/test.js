@@ -3,13 +3,13 @@ let {
     Address,
     key,
     TransactionBuilder,
-    TransactionHelper
-    // axios
+    TransactionHelper,
+    NodeClient
 } = hx_js;
 let {Apis, ChainConfig} = hx_js.bitshares_ws;
 
 // import {PrivateKey, key} from "../lib";
-let chainid =
+const chainid =
     "2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12";
 
 ChainConfig.setChainId(
@@ -20,7 +20,15 @@ ChainConfig.setChainId(
 
 // let nodeApiUrl = "ws://211.159.168.197:6090"; // mainnet: "ws://211.159.168.197:6090", testnet: "ws://47.74.44.110:8091";
 // let nodeApiUrl = "ws://localhost:8090";
-let nodeApiUrl = "wss://nodeapi.hxlab.org:443";
+const nodeApiUrl = "wss://nodeapi.hxlab.org:443";
+
+const nodeHttpApiUrlObject = new URL(nodeApiUrl);
+if (nodeHttpApiUrlObject.protocol === "wss:") {
+    nodeHttpApiUrlObject.protocol = "https:";
+} else if (nodeHttpApiUrlObject.protocol === "ws:") {
+    nodeHttpApiUrlObject.protocol = "http:";
+}
+const nodeHttpApiUrl = nodeHttpApiUrlObject.toString();
 
 ChainConfig.address_prefix = "HX";
 ChainConfig.expire_in_secs = 5 * 60; // 5 min
@@ -58,16 +66,6 @@ function testTransfer(tr) {
 let gpcHex =
     "0836789b24b8fb05b133c750d7190ec4ba2e3f50000003731b476c7561100019930d0a1a0a040804080878560000000000000000000000287740010000000000000000000002040a0000002c0000006c40000080000000a4808000ec8000008ac00080ecc000008ac08080a600000126008000020000000405696e6974040673746172740100000001000400000000010000000100000001000208000000224000001e4000804b00000000008000220000001ec0ff7f2600000126008000000000000000000000000000080000000100000001000000010000000100000001000000010000000100000001000000010000000670726f707300000000080000000000000000010000000100000001000208000000224000001e4000804b00000000008000220000001ec0ff7f2600000126008000000000000000000000000000080000000100000001000000010000000100000001000000010000000100000001000000010000000670726f707300000000080000000000000000070000000a00000001000306000000470040004a80c08046c0400081000100644000012600800005000000040873746f7261676504056e616d65041073696d706c655f636f6e747261637404067072696e74041773696d706c6520636f6e747261637420696e69746564010000000000000000000600000008000000080000000900000009000000090000000a000000010000000573656c66000000000600000001000000055f454e56000c000000100000000200050d00000086004000c1400000a440000186004000c180000007c1400007014102a440800181400100c00080009dc00001a6000001260080000600000004067072696e7404247374617274206170692063616c6c6564206f662073696d706c6520636f6e7472616374040e73746f726167652e6e616d653d040873746f7261676504056e616d65040768656c6c6f20010000000000000000000d0000000d0000000d0000000d0000000e0000000e0000000e0000000e0000000e0000000f0000000f0000000f0000000f00000010000000020000000573656c66000000000d00000004617267000000000d00000001000000055f454e560a000000010000000100000005000000050000000a00000007000000100000000c00000012000000120000000300000009436f6e7472616374010000000a0000000853746f72616765020000000a000000024d040000000a00000001000000055f454e560000000200000004696e6974000000057374617274000000000000000000000001000000046e616d6500000004";
 var gpcObject = TransactionHelper.decode_contract_code_object_from_gpc(gpcHex);
-
-function testRegisterContractTesting(tr) {
-    TransactionHelper.registerContractTesting(apiInstance, pubkey, gpcHex)
-        .then(data => {
-            console.log(data);
-        })
-        .catch(err => {
-            console.log(err);
-        });
-}
 
 function testRegisterContract(tr) {
     console.log("gpcObject", gpcObject);
@@ -186,13 +184,8 @@ function testInvokeContractTesting(tr) {
     var contractId = "HXCeMwCyGJhQhpXPZoMPYKgWuuh7eEzgCwkS";
     var contractApi = "balanceOf";
     var apiArg = "HXNUE3EyLeWpN5XA8S4q5DVrbGguWSmPfSoN";
-    TransactionHelper.invokeContractOffline(
-        apiInstance,
-        pubkey,
-        contractId,
-        contractApi,
-        apiArg
-    )
+    nodeClient
+        .invokeContractOffline(pubkey, contractId, contractApi, apiArg)
         .then(data => {
             console.log("testInvokeContractTesting result", data);
         })
@@ -206,14 +199,14 @@ function testTransferToContractTesting(tr) {
     var assetAmount = 1;
     var assetSymbol = "HX";
     var transferMemo = "test";
-    TransactionHelper.transferToContractTesting(
-        apiInstance,
-        pubkey,
-        contractId,
-        assetAmount,
-        assetSymbol,
-        transferMemo
-    )
+    nodeClient
+        .transferToContractTesting(
+            pubkey,
+            contractId,
+            assetAmount,
+            assetSymbol,
+            transferMemo
+        )
         .then(data => {
             console.log("testTransferToContractTesting result", data);
             var feeAsset = data[0];
@@ -227,7 +220,8 @@ function testTransferToContractTesting(tr) {
 }
 
 function testRegisterContractTesting(tr) {
-    TransactionHelper.registerContractTesting(apiInstance, pubkey, gpcHex)
+    nodeClient
+        .registerContractTesting(pubkey, gpcHex)
         .then(data => {
             console.log("testRegisterContractTesting result", data);
         })
@@ -291,19 +285,23 @@ console.log("toRecoverDigestFromServer: " + toRecoverDigestFromServer);
 console.log("recovered pubkey: " + recovered.toPublicKeyString());
 
 let apiInstance = Apis.instance(nodeApiUrl, true);
-apiInstance.init_promise
+
+const nodeClient = new NodeClient(apiInstance);
+
+nodeClient
+    .afterInited()
     .then(function() {
-        TransactionHelper.getAddrBalances(apiInstance, address).then(r => {
+        nodeClient.getAddrBalances(address).then(r => {
             console.log("balances: ", r);
         });
-        TransactionHelper.getAccountByAddresss(
-            apiInstance,
-            "HXNdkruwzhKc8EQKVNirF7xPLLpEojResJcZ"
-        ).then(r => {
-            console.log("account found by address: ", r);
-        });
+        nodeClient
+            .getAccountByAddresss("HXNdkruwzhKc8EQKVNirF7xPLLpEojResJcZ")
+            .then(r => {
+                console.log("account found by address: ", r);
+            });
 
-        TransactionHelper.getAddressPayBackBalance(apiInstance, address)
+        nodeClient
+            .getAddressPayBackBalance(address)
             .then(data => {
                 console.log(data);
             })
