@@ -4,11 +4,11 @@ let {
     key,
     TransactionBuilder,
     TransactionHelper,
-    NodeClient
+    NodeClient,
+    Apis,
+    ChainConfig
 } = hx_js;
-let {Apis, ChainConfig} = hx_js.bitshares_ws;
 
-// import {PrivateKey, key} from "../lib";
 const chainid =
     "2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12";
 
@@ -21,14 +21,6 @@ ChainConfig.setChainId(
 // let nodeApiUrl = "ws://211.159.168.197:6090"; // mainnet: "ws://211.159.168.197:6090", testnet: "ws://47.74.44.110:8091";
 // let nodeApiUrl = "ws://localhost:8090";
 const nodeApiUrl = "wss://nodeapi.hxlab.org:443";
-
-const nodeHttpApiUrlObject = new URL(nodeApiUrl);
-if (nodeHttpApiUrlObject.protocol === "wss:") {
-    nodeHttpApiUrlObject.protocol = "https:";
-} else if (nodeHttpApiUrlObject.protocol === "ws:") {
-    nodeHttpApiUrlObject.protocol = "http:";
-}
-const nodeHttpApiUrl = nodeHttpApiUrlObject.toString();
 
 ChainConfig.address_prefix = "HX";
 ChainConfig.expire_in_secs = 5 * 60; // 5 min
@@ -93,9 +85,6 @@ function testRegisterContract(tr) {
         )
     );
 }
-
-// TODO: register contract testing, transfer to contract testing
-// TODO: wrap some op creators
 
 function testInvokeContract(tr) {
     var contractId = "HXCeMwCyGJhQhpXPZoMPYKgWuuh7eEzgCwkS";
