@@ -214,6 +214,18 @@ you can use TransactionHelper class to create some operations and then add them 
         });
 ```
 
+* getGlobalDynamicProperties
+
+```
+    nodeClient.getGlobalDynamicProperties()
+        .then(info => {
+            console.log("chain info", info);
+        })
+        .catch(e => {
+            console.log("error", e);
+        });
+```
+
 * listAssets
 
 ```
