@@ -6,8 +6,20 @@ let {
     TransactionHelper,
     NodeClient,
     Apis,
-    ChainConfig
+    ChainConfig,
+    WalletAccountUtil
 } = hx_js;
+const walletJson = {};
+const password = "";
+try {
+    const wallet = WalletAccountUtil.decodeWalletJson(walletJson, password);
+    console.log(wallet);
+    for (const account of wallet.my_accounts) {
+        console.log("account", account);
+    }
+} catch (e) {
+    console.log(e);
+}
 
 const chainid =
     "2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12";
@@ -20,7 +32,7 @@ ChainConfig.setChainId(
 
 // let nodeApiUrl = "ws://211.159.168.197:6090"; // mainnet: "ws://211.159.168.197:6090", testnet: "ws://47.74.44.110:8091";
 // let nodeApiUrl = "ws://localhost:8090";
-const nodeApiUrl = "wss://nodeapi.hxlab.org:443";
+const nodeApiUrl = "wss://nodeapi.hxlab.org";
 
 ChainConfig.address_prefix = "HX";
 ChainConfig.expire_in_secs = 5 * 60; // 5 min
