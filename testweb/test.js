@@ -50,6 +50,9 @@ console.log("Public key :", pubkey.toString(), "\n");
 console.log("Public key hex :", pubkey.toHex(), "\n");
 console.log("Address:", address);
 
+var rawSig = TransactionHelper.signHex("112233", pkey, pubkey);
+console.log("rawSig", rawSig.toHex());
+
 let toAddress = "HXNLhDsXUTy87nGYHfUsCD797MyDCUgXEAgr";
 
 console.log("chain id bytes: ", TransactionHelper.bytes_to_hex(chainid));

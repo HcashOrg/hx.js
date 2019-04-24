@@ -202,6 +202,13 @@ you can use TransactionHelper class to create some operations and then add them 
     tr.add_type_operation("pay_back", op);
 ```
 
+* sign raw buffer
+
+```
+    var rawSig = TransactionHelper.signHex('112233', pkey, pubkey);
+    console.log("rawSig", rawSig.toHex());
+```
+
 #### NodeClient RPC
 
 * execDbApi
